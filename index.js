@@ -5,14 +5,15 @@ const cTable = require("console.table");
 const db = mysql.createConnection(
     {
         host: "localhost",
+        port: "3306",
         user: "root",
         password: "",
-        database: "business_db"
+        database: "company_db"
     },
-    firstQ()
+    firstQuestion()
 );
 
-function firstQ(){
+function firstQuestion(){
     inquirer.prompt([
         {
             name: "start",
@@ -24,37 +25,35 @@ function firstQ(){
                 "add a department",
                 "add a role",
                 "add employee",
-                "update eployee",
+                "update employee",
                 "exit"],
             type: "list"
         }
     ])
-    .then (answers => {
-        let answer = (answers["start"]);
-        cheackAnswer(answer);
-    })
-}
-
-function checkAnswer(answers) {
-    if(answer === "view all departments") {
-        getDepartments();
-    } else if (answer === "view all roles") {
-        getRoles();
-    } else if (answer === "view all employees") {
-        getEmployees();
-    } else if (answer === "add a department") {
-        addDepartment();
-    } else if (answer === "add a role") {
-        addRole();
-    } else if (answer === "add employee") {
-        addEmployee();
-    } else if (answer === "update employee") {
-        UpdateEmployee();
-    } 
+    .then(function (data) {
+        if (data.start == "view all departments") {
+            getDepartments();  
+        } else if (data.start == "view all roles") {
+            getRoles();  
+        } else if (data.start == "view all employees") {
+            getEmployees();  
+        } else if (data.start == "add a department") {
+            addDepartment();  
+        } else if (data.start == "add a role") {
+            addRole();  
+        } else if (data.start == "add employee") {
+            addEmployee();  
+        } else if (data.start == "update employee") {
+            updateEmployee();  
+        } else if (data.start == "exit") {
+           console.log("You have exited the program");
+           process.exit();
+        } 
+    });
 }
 
 const getDepartments = () => {
-    const sql = "SELECT departments.id as dept_id, departments.department_name as dept_name from departments" 
+    const sql = "SELECT id as dept_id, name as dept_name from department" 
     db.query(sql, (err, results) => {
         if(err) {
             console.log({error: err.message});
@@ -62,27 +61,27 @@ const getDepartments = () => {
         }
         console.table(results);
 
-        fisrtQ();
+        firstQuestion();
     });
 };
 
 function addDepartment() {
     return inquirer.prompt([
         {
-            name: "department_name",
+            name: "name",
             message: "What is the name of the department?",
             type: "input",
         }
     ])
     .then(answer => {
-        const userAns = (answer["department_name"]);
+        const userAns = (answer["name"]);
         addDepartmentQuery(userAns);
     })
 };
 
 const addDepartmentQuery = (answer) => {
     console.log(answer);
-    const sql = "Insert INTO departments (department_name) VALUES (?)";
+    const sql = "Insert INTO department (name) VALUES (?)";
     const params = [answer];
 
     db.query(sql, params, (err, results) => {
@@ -91,12 +90,12 @@ const addDepartmentQuery = (answer) => {
             return;
         }
         console.log("Success, department added to department table");
-        fistQ();
+        firstQuestion();
     });
 };
 
 const getRoles = () => {
-    const sql = "SELECT roles.id as role_id, roles.title as job_title, roles_salary as role_salary, departments.department_name as dept_name FROM roles JOIN departments ON roles.department_id = departments.id";
+    const sql = "SELECT role.id as role_id, role.title as job_title, salary as salary, department.name as dept_name FROM role JOIN department ON role.department_id = department.id";
 
     db.query(sql, function (err, results) {
         if(err) {
@@ -104,12 +103,12 @@ const getRoles = () => {
             return;
         }
         console.table(results);
-        firstQ();
+        firstQuestion();
     });
 };
 
 const getEmployees = () => {
-    const sql = "SELECT employees.id as employee_id, employees.first_name as first_name, employees.last_name as last_name, roles.title as job_title, roles.salary as role_salary, employees.manager_id as manager_id from emplyees JOIN roles on enployees.role_id = roles.id";
+    const sql = "SELECT employee.id as employee_id, employee.first_name as first_name, employee.last_name as last_name, role.title as job_title, role.salary as salary, employee.manager_id as manager_id from employee JOIN role on employee.role_id = role.id";
 
     db.query(sql, function (err, results) {
         if(err) {
@@ -117,14 +116,32 @@ const getEmployees = () => {
             return;
         }
         console.table(results);
-        firstQ();
+        firstQuestion();
+    });
+};
+const addRoleQuery = (title, salary, department) => {
+
+    const roleSql = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+    const params = [title, salary, department];
+    console.log("This is inside add role query")
+
+    db.query(roleSql, params, (err, results) => {
+        if (err) {
+            console.log(results);
+            console.log({error:err.message});
+            return;
+        }
+        console.log("Success, role added to employee table");
+        firstQuestion();
     });
 };
 
-function addRole() {
-    const sql = "SELECT department as name, id as value FROM departments";
+const addRole = () => {
+    const sql = "SELECT name, id as value FROM department";
+    console.log("inside add role");
 
     db.query(sql, (err, departmentList) => {
+        console.log(err);
         inquirer.prompt([
             {
                 name: "title",
@@ -153,9 +170,11 @@ function addRole() {
     });
 };
 
-const addRoleQuery = (title, salary, department) => {
 
-    const roleSql = "INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+
+const addEmployeeQuery = (firstName, lastName, role, manager) => {
+
+    const sql = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
     const params = [firstName, lastName, role, manager];
 
     db.query(sql, params, (err, results) => {
@@ -164,14 +183,16 @@ const addRoleQuery = (title, salary, department) => {
             return;
         }
         console.log("Success, employee added to employee table");
-        firstQ();
+        firstQuestion();
     });
 };
 
-async function addEmployee() {
-    const [ managers ] = await db.promise().query("SELECT CONCAT(first_name, last_name) as name, id as value FROM employees");
 
-    const [ roles ] = await db.promise().query("SELECT title as name, id as value FROM roles");
+
+async function addEmployee() {
+    const [ managers ] = await db.promise().query("SELECT CONCAT(first_name, last_name) as name, id as value FROM employee");
+
+    const [ roles ] = await db.promise().query("SELECT title as name, id as value FROM role");
 
     const answers = await inquirer.prompt([
         {
@@ -199,10 +220,60 @@ async function addEmployee() {
     ]);
 
     const firstName = (answers["firstName"]);
-    const lastname = (answers["lastName"]);
+    const lastName = (answers["lastName"]);
     const role = (answers["role"]);
     const manager = (answers["manager"]);
     console.log(firstName, lastName, role, manager);
 
-    addDepartmentQuery(firstName, lastName, role, manager);
+    addEmployeeQuery(firstName, lastName, role, manager);
 };
+
+const updateEmployeeQuery = (employeeName, newRole, newManager) => {
+    const sql = 'Update employee SET role_id = ?, manager_id = ? WHERE id = ?';
+    const params = [newRole, newManager, employeeName];
+
+    db.query(sql, params, (err, results) => {
+        if (err) {
+            console.log({error:err.message});
+            return;
+        }
+        console.log("Success, employee updated in database");
+        firstQuestion();
+    })
+}
+
+async function updateEmployee() {
+    const [ employees ] = await db.promise().query("SELECT CONCAT (first_name, ' ', last_name) as name, id as value FROM employee");
+    const [ roles ] = await db.promise().query("SELECT title as name, id as value FROM role");
+    const [ managers ] = await db.promise().query("SELECT CONCAT(first_name, ' ', last_name) as name, id as value FROM employee");
+    console.log("inside update enployee");
+
+    const answers = await inquirer.prompt([
+        {
+            name: "employeeName",
+            message: "Select employee to update",
+            type: "list",
+            choices: employees
+        },
+        {
+            name: "newRole",
+            message: "What is their new role?",
+            type: "list",
+            choices: roles
+        },
+        {
+            name: "newManager",
+            message: "Select their new manager",
+            type: "list",
+            choices: managers
+        }
+    ]);
+
+    const employeeName = (answers["employeeName"]);
+    const newRole = (answers["newRole"]);
+    const newManager = (answers["newManager"]);
+
+    updateEmployeeQuery(employeeName, newRole, newManager);
+};
+
+

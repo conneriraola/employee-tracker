@@ -1,10 +1,10 @@
-INSERT INTO departments (department_name)
+INSERT INTO department (name)
 VALUES ("Engineering"), 
        ("Marketing"), 
        ("Design"), 
        ("Product");
 
-INSERT INTO roles (title, salary, department_id)
+INSERT INTO role (title, salary, department_id)
 VALUES ("Eng Manager", 180000, 1),
        ("Sr. Engineer", 140000, 1),
        ("Jr. Engineer", 110000, 1),
@@ -16,14 +16,14 @@ VALUES ("Eng Manager", 180000, 1),
        ("Sr. Product Manager", 140000, 4),
        ("Product Manager", 100000, 4);
 
-INSERT INTO employees (first_name, last_name, role_id, manager_id)
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES ("Brian", "Short", 1, null), 
-       ("Tracey", "Monroe", 2, null), 
-       ("Wendy", "Lewst", 3, null), 
-       ("Tommy", "Bach", 4, null), 
-       ("Kara", "Tilly", 5, null), 
-       ("Carson", "Stendera", 6, null), 
-       ("Dave", "Moore", 7, null), 
-       ("Randy", "Rodriguez", 8, null), 
-       ("Ruby", "Brown", 9, null), 
-       ("Emma", "Chen", 10, null);
+       ("Tracey", "Monroe", 2, 1), 
+       ("Wendy", "Lewst", 3, 1), 
+       ("Tommy", "Bach", 4, 1), 
+       ("Kara", "Tilly", 5, 1), 
+       ("Carson", "Stendera", 6, 1), 
+       ("Dave", "Moore", 7, 1), 
+       ("Randy", "Rodriguez", 8, 1), 
+       ("Ruby", "Brown", 9, 1), 
+       ("Emma", "Chen", 10, 1);
