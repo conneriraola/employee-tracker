@@ -5,7 +5,7 @@ https://github.com/conneriraola/Employee-tracker
 
 
 ## Description
-This app allows employers to keep track of all employees. Employers can add departments, roles and employees. They can also update employees.
+This app allows employers to keep track of all employees. Employers can view/add departments, roles and employees. They can also update employees.
 
 
 ## Table of Contents
